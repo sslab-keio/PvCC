@@ -1,0 +1,13 @@
+network:
+    ethernets:
+        <netif SR-IOV PF>:
+            virtual-function-count: 32
+    bridges:
+        xenbr0:
+            addresses: [192.168.70.250/24]
+            dhcp4: false
+        xenbr1:
+            interfaces:
+              - <netif external>
+            dhcp4: true
+    version: 2

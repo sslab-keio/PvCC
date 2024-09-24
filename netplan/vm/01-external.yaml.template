@@ -1,0 +1,7 @@
+network:
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses: [__IP__]
+    eth1:
+      dhcp4: yes

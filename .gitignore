@@ -1,0 +1,12 @@
+__pycache__
+images/*.img
+images/debootstrap-jammy
+images/debootstrap-bionic
+
+build-xen/pvcc/install
+build-xen/vanilla/install
+
+.env
+
+pvcc-server/build
+

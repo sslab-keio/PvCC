@@ -1,0 +1,8 @@
+services:
+  graph:
+    build: figures
+    volumes:
+      - ./data:/data
+      - ./figures:/scripts
+      - ./figures/out:/figures
+

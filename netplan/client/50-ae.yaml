@@ -1,0 +1,5 @@
+network:
+  ethernets:
+    <netif to server>:
+      dhcp4: no
+      addresses: [10.0.0.250/24]

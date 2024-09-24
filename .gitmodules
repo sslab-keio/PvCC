@@ -1,0 +1,6 @@
+[submodule "build-xen/vanilla/xen"]
+	path = build-xen/vanilla/xen
+	url = git://xenbits.xen.org/xen.git
+[submodule "build-xen/pvcc/xen-source"]
+	path = build-xen/pvcc/xen-source
+	url = git://xenbits.xen.org/xen.git
