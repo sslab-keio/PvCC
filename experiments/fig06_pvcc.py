@@ -59,7 +59,7 @@ def nginx(preset_rates, dataroot):
         rates = preset_rates
 
     for rate in rates:
-        ssh_run(client, f"~/wrk2/wrk http://10.0.0.11 --duration 10 --threads 24 --connections 24 --rate {rate} --u_latency | tee {logdir}/{rate}rps", check=True)
+        assert(client_popen(f"~/wrk2/wrk http://10.0.0.11 --duration 10 --threads 24 --connections 24 --rate {rate} --u_latency | tee {logdir}/{rate}rps", check=True).wait() == 0)
 
     subprocess.run("./reset.sh", shell=True)
 
@@ -87,7 +87,7 @@ def redis(preset_rates, dataroot):
         rates = preset_rates
 
     for rate in rates:
-        ssh_run(client, f"~/memtier_benchmark/memtier_benchmark --host 10.0.0.11 --port 6379 --test-time 10 --ratio 0:1 --threads 24 --clients 1 --rate {rate} | tee {logdir}/{rate}rps", check=True)
+        assert(client_popen(f"~/memtier_benchmark/memtier_benchmark --host 10.0.0.11 --port 6379 --test-time 10 --ratio 0:1 --threads 24 --clients 1 --rate {rate} | tee {logdir}/{rate}rps", check=True).wait() == 0)
 
     subprocess.run("./reset.sh", shell=True)
 
