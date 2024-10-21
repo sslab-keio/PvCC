@@ -6,7 +6,7 @@ conns_per_thread = 7
 
 labels = {"linux": "Linux", "dpdk": "DPDK"}
 plotparams = {
-    "linux": { "label": 'Linux', "marker": "D", "color": "#ffb84c", "markersize": 5, "fillstyle": "none" },
+    "linux": { "label": 'Linux', "marker": "D", "color": "#ffb84c", "markersize": 5 },
     "dpdk": { "label": 'DPDK', "marker": "$✳$", "color": "#a459d1", "markeredgewidth": 0.001, "markersize": 8 },
 }
 legendparams = {

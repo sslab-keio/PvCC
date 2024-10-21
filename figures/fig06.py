@@ -5,9 +5,9 @@ titley = -0.45
 markersize=4
 
 plotparams = {
-    "pvcc": { "label": 'PvCC (tslice=100µs)', "marker": "o", "color": "darkorange", "fillstyle": "none", "markersize": 5 },
-    "credit": { "label": 'Credit (tslice=1000µs)', "marker": "^", "color": "yellowgreen", "markersize": 5, "fillstyle": "none" },
-    "credit2": { "label": 'Credit2 (ratelimit=0µs)', "marker": "D", "color": "forestgreen", "fillstyle": "none", "markersize": 4 },
+    "pvcc": { "label": 'PvCC (tslice=100µs)', "marker": "o", "color": "darkorange", "markersize": 5 },
+    "credit": { "label": 'Credit (tslice=1000µs)', "marker": "^", "color": "yellowgreen", "markersize": 5 },
+    "credit2": { "label": 'Credit2 (ratelimit=0µs)', "marker": "D", "color": "forestgreen", "markersize": 4 },
 }
 labels = {"pvcc": 'PvCC (tslice=100µs)', "credit": 'Credit (tslice=1000µs)', "credit2": 'Credit2 (ratelimit=0µs)'}
 
@@ -60,7 +60,6 @@ def nginx(ax, dataroot, setup, preset_rates, linestyle):
     ax.set_ylim((0, 6500))
     ax.set_yticks([0, 2000, 4000, 6000])
     ax.set_title("Nginx", y=titley, fontsize=11)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.25), ncol=3, frameon=False, handlelength=0, handletextpad=0.9, fontsize=10, columnspacing=1.5)
 
 def redis(ax, dataroot, setup, preset_rates, linestyle):
     rpss = []
@@ -129,6 +128,8 @@ def main():
             nginx(axes[1], dataroot, setup, rates, linestyle)
         if "redis" in workloads:
             redis(axes[2], dataroot, setup, rates, linestyle)
+
+    axes[0].legend(loc="upper center", bbox_to_anchor=(0.5, 1.25), ncol=3, frameon=False, handlelength=0, handletextpad=0.9, fontsize=10, columnspacing=1.5)
 
     plt.subplots_adjust(wspace=0.3)
     plt.savefig(outfile, bbox_inches="tight")

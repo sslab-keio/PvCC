@@ -114,15 +114,13 @@ for (dpdk_vm_num, preset_qpss, scale, ax, slos, xlim, conn) in [
             x.append(summary.qps / 1000)
             y.append(summary.read_p99)
         
-        ax.plot(x, y, marker="o", fillstyle="none", markersize=4, label=f'Tslice={tslice}µs', linestyle=linestyle)
+        ax.plot(x, y, marker="o", markersize=4, label=f'Tslice={tslice}µs', linestyle=linestyle)
 
     ax.set_xlabel('Throughput [Kqueries/sec]')
     ax.set_ylabel('99%-ile Latency [µs]')
     ax.set_xlim([0, xlim])
-    ax.set_ylim([0, 1000 * scale])
     
-    if dpdk_vm_num == 1:
-        ax.legend(loc='upper left', fontsize=9)
+    ax.legend(loc='upper center', fontsize=9)
 
     ax.set_title(f'{dpdk_vm_num} VM')
     
