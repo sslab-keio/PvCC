@@ -1,11 +1,7 @@
 # PvCC: A vCPU Scheduling Policy for DPDK-applied Systems at Multi-Tenant Edge Data Centers
 
 ## Table of Contents
-- [Overview](#overview)
-- [Getting Started](#getting-started)
-- [Server Side Setups](#server-side-setups)
-- [Client Side Setups](#client-side-setups)
-- [Major Claims](#major-claims)
+- [Setup](#server-side-setups)
 - [Experiment workflows](#experiment-workflows)
 
 ## Overview
@@ -76,6 +72,19 @@ $ sudo update-grub
 $ sudo grub-reboot "Ubuntu GNU/Linux, with Xen 4.12.1-ae-vanilla and Linux `uname -r`"
 $ sudo reboot
 ```
+
+
+### Compiling vCPU scaling API server
+
+The vCPU scaling API server scales up and down the number of dedicated physical CPUs for I/O.
+
+Compile the vCPU scaling API server with the following commands.
+
+```sh
+$ cd ${ARTIFACT_ROOT}/pvcc-server
+$ make
+```
+
 
 ### Network configuration
 
@@ -168,23 +177,12 @@ $ images/fstack.sh    # For F-Stack
 $ images/sysbench.sh  # For sysbench
 ```
 
-### Compiling vCPU scaling API server
-
-The vCPU scaling API server scales up and down the number of dedicated physical CPUs for I/O.
-
-Compile the vCPU scaling API server with the following commands.
-
-```sh
-$ cd ${ARTIFACT_ROOT}/pvcc-server
-$ make
-```
-
 ## Client Side Setups
 
 ### Installing benchmark tools
 
 Install mutilate, wrk2, and memtier_benchmark on the client machine.
-```
+```sh
 # Install build dependencies
 $ sudo apt install -y scons libevent-dev gengetopt libzmq3-dev make libevent-dev libpcre3-dev libssl-dev autoconf automake pkg-config make g++
 
@@ -239,15 +237,35 @@ $ sudo netplan apply
 * **Claim 2**: In consolidated setup, serving latency of DPDK-applied systems increases. (Figure 6)
 * **Claim 3**: The serving latency can be decreased by adopting a microsecond-scale time slice. (Figure 6)
 * **Claim 4**: Short time slices trade off maximum throughput for low serving latency. (Figure 10)
-* **Claim 5**: vCPU scaling API mitigates this trade-off by changing the CPU overcommitment ratio. (Figure 11)
+* **Claim 5**: This trade-off can be mitigated with vCPU scaling API by changing the CPU overcommitment ratio. (Figure 11)
 
 ## Experiment workflows
 
 ### Experiment for Claim 1
 
-To quantify the optimizations of DPDK, this experiment compares the performance of the DPDK-based network stack and the kernel network stack.
+This experiment shows that DPDK applied system can utilize CPU cycles more efficiently than the kernel network stack.
 
 To conduct the experiment, run:
+
+```sh
+$ cd $ARTIFACT_ROOT
+
+$ sudo python3 experiments/fig02.py --threads 1 12 24 --trial 1
+
+# Draw a figure
+$ sudo docker compose run --rm graph python3 /scripts/fig02.py --threads 1 12 24 --trial 1
+```
+
+The server runs the Seastar, a high performance TCP/IP stack with two networking modes, kernel TCP/IP stack and DPDK network stack.
+
+The client runs mutilate to perform GET 100% load while changing the concurrency of TCP connections.
+
+This experiment compares the achieved throughput of kernel TCP/IP stack and DPDK.
+
+You will see that DPDK achieves around higher throughput than the kernel network stack, using the same amount of CPU resources (Claim 1).
+
+<details>
+    <summary>Evaluation with full data</summary>
 
 ```sh
 $ cd $ARTIFACT_ROOT
@@ -259,38 +277,51 @@ $ sudo docker compose run --rm graph python3 /scripts/fig02.py
 $ ls figures/fig02.pdf
 ```
 
-You will see that DPDK achieves around higher throughput than the kernel network stack, using the same amount of CPU resources (Claim 1).
-
-<details>
-    <summary>Evaluation with restrictive data</summary>
-
-In case of time constraints, you can evaluate the optimization of DPDK with restrictive data.
-
-```sh
-$ cd $ARTIFACT_ROOT
-
-# Picking up fewer cases;
-# The client benchmark tool uses 1, 12, or 24 threads
-$ sudo python3 experiments/fig02.py --threads 1 12 24 --trial 1
-$ sudo docker compose run --rm graph python3 /scripts/fig02.py --threads 1 12 24 --trial 1
-```
 </details>
 
 ### Experiment for Claim 2,3
 
-This experiment compares PvCC with the baseline settings, the Credit and Credit2 schedulers of Xen.
+This experiment compares PvCC with the Xen's default schedulers, the Credit and Credit2 scheduler.
 
-First, run the experiment for Credit and Credit2 schedulers with vanilla Xen.
+Then, run the following commands.
 ```sh
 $ cd $ARTIFACT_ROOT
 
-$ sudo python3 experiments/fig06_vanilla.py
-$ ls data/fig06/memcached/credit data/fig06/memcached/credit2
-$ ls data/fig06/nginx/credit data/fig06/nginx/credit2
-$ ls data/fig06/redis/credit data/fig06/redis/credit2
+# Run with the vanilla Xen setup
+$ sudo python3 experiments/fig06_vanilla.py --workloads memcached --rates 5000 40000 90000 --trial 1
+# --workloads [WORKLOADS, ...]  # Execute specific workload only
+# --rates [RATES, ...]          # Restrict data with the specific RATES
+# --trial TRIAL
+
+# Reboot into Xen equipped with PvCC.
+$ sudo grub-reboot "Ubuntu GNU/Linux, with Xen 4.12.1-ae-pvcc and Linux `uname -r`"
+$ sudo reboot
+
+# Apply netplan again
+$ sudo netplan apply
+
+# Run with the PvCC setup
+$ sudo python3 experiments/fig06_pvcc.py --workloads memcached --rates 5000 40000 90000 --trial 1
+
+# Draw a figure
+$ sudo docker compose run --rm graph python3 /scripts/fig06.py --workloads memcached --rates 5000 40000 90000 --trial 1
 ```
 
-Then, run the experiment for PvCC.
+The server runs four single-vCPU Seastar memcached instances on one physical core.
+The client runs mutilate to generate load for only one instance.
+
+This experiment reports resulting throughput and 99th-percentile latency.
+
+In `figures/fig06.pdf`, you will see that PvCC achieves 99th-percentile latency of sub-milliseconds while Credit or Credit2 scheduler always causes a 99th-percentile latency of several milliseconds.
+
+For throughput, PvCC will be saturated earlier than Credit and Credit2.
+
+This result shows that the serving latency of DPDK-applied systems increases (Claim 2).
+It also shows that this overhead can be mitigated by adopting microsecond-scale timeslice.
+
+<details>
+    <summary>Evaluation with full data</summary>
+
 ```sh
 # Reboot into Xen equipped with PvCC.
 $ sudo grub-reboot "Ubuntu GNU/Linux, with Xen 4.12.1-ae-pvcc and Linux `uname -r`"
@@ -305,35 +336,13 @@ $ sudo python3 experiments/fig06_pvcc.py
 $ ls data/fig06/memcached/pvcc
 $ ls data/fig06/nginx/pvcc
 $ ls data/fig06/redis/pvcc
-```
 
-To summarize the result in a figure, run:
-```sh
+# Draw a figure
 $ cd $ARTIFACT_ROOT
 $ sudo docker compose run --rm graph python3 /scripts/fig06.py
 $ ls figures/fig06.pdf
 ```
 
-In `figures/fig06.pdf`, you will see the default Credit or Credit2 scheduler always causes a 99th-percentile latency of several milliseconds (Claim 2).
-
-PvCC is expected to achieve 99th-percentile latency of sub-milliseconds in memcached and around one millisecond in nginx and Redis.
-
-This result shows that a microsecond-scale time slice can reduce serving latency of DPDK (Claim 3).
-
-<details>
-    <summary>Evaluation with restrictive data</summary>
-
-You can evaluate the benefit of a microsecond-scale time slice with restrictive data.
-
-```sh
-$ cd $ARTIFACT_ROOT
-
-# Picking up one workload (memcached)
-# Restricting the variety of incoming load (only 5000, 40000, 90000 RPS)
-$ sudo python3 experiments/fig06_vanilla.py --workloads memcached --rates 5000 40000 90000 --trial 1
-$ sudo python3 experiments/fig06_pvcc.py --workloads memcached --rates 5000 40000 90000 --trial 1
-$ sudo docker compose run --rm graph python3 /scripts/fig06.py --workloads memcached --rates 5000 40000 90000 --trial 1
-```
 </details>
 
 ### Experiment for Claim 4
@@ -343,53 +352,65 @@ Run the following commands to conduct the experiment.
 
 ```sh
 $ cd $ARTIFACT_ROOT
+$ sudo python3 experiments/fig10.py --vms 4 --tslices 100 1000 --rates 1000 40000 100000 --trial 1
+
+# Draw a figure
+$ sudo docker compose run --rm graph python3 /scripts/fig10.py --vms 4 --tslices 100 1000 --rates 1000 40000 100000 --trial 1
+```
+
+The server runs four single-vCPU Seastar memcached instances with 100µs or 1000µs timeslice.
+
+The client runs mutilate while changing the offering load.
+
+This experiment reports resulting throughput and 99th-percentile latency.
+
+In `figures/fig10.pdf`, you will see that short time slices offer the latency advantage when the incoming request rate is low.
+On the other hand, instances with the short timeslices (100µs) are saturated earlier than the longer timeslice (1000µs) one.
+
+This means that short time slices offer low latency at the expense of maximum throughput (Claim 4).
+
+<details>
+    <summary>Evaluation with restrictive data</summary>
+
+```sh
+$ cd $ARTIFACT_ROOT
 $ sudo python3 experiments/fig10.py
 $ ls data/fig10
 $ sudo docker compose run --rm graph python3 /scripts/fig10.py
 $ ls figures/fig10.pdf
 ```
 
-In `figures/fig10.pdf`, you will see that short time slices offer the latency advantage when the incoming request rate is low.
-
-However, as the number of consolidated VMs increases, the maximum throughput of short time slices is substantially reduced due to the frequent context switch overhead.
-
-This means that short time slices offer low latency at the expense of high maximum throughput (Claim 4).
-
-<details>
-    <summary>Evaluation with restrictive data</summary>
-
-The following commands consider:
-- 4VM consolidation
-- [100, 1000] µs timeslices
-- [1000, 40000, 100000] incoming RPS
-
-```sh
-$ cd $ARTIFACT_ROOT
-
-$ sudo python3 experiments/fig10.py --vms 4 --tslices 100 1000 --rates 1000 40000 100000 --trial 1
-$ sudo docker compose run --rm graph python3 /scripts/fig10.py --vms 4 --tslices 100 1000 --rates 1000 40000 100000 --trial 1
-```
 </details>
 
 ### Experiment for Claim 5
 This experiment shows how the vCPU scaling API contributes to handling load increase.
 
-Run the following commands to conduct the experiment.
+Run the following commands.
 
 ```sh
 $ cd $ARTIFACT_ROOT
 $ sudo python3 experiments/fig11.py
 $ ls data/fig11
 $ sudo docker compose run --rm graph python3 /scripts/fig11a.py
-$ sudo docker compose run --rm graph python3 /scripts/fig11b.py
 $ sudo docker compose run --rm graph python3 /scripts/fig11c.py
-$ ls figures/fig11a.pdf figures/fig11b.pdf figures/fig11c.pdf
+$ ls figures/fig11a.pdf figures/fig11c.pdf
 ```
 
-"PvCC" denotes the setup with the short time slice (100us) adopting the vCPU scaling API.
+The server runs four single-vCPU Seastar memcached instances (Latency-Sensitive tasks) and one 24-vCPU Sysbench instance (Best-Effort task).
 
-In `figures/fig11a.pdf`, you will see that the PvCC case keeps up with the performance of the Pin case where physical CPUs are dedicated to each latency-sensitive task.
+All tasks runs on 6 physical cores.
 
-In `figures/fig11c.pdf`, you will observe that, with the vCPU scaling API, the best-effort task can utilize the CPU time while it is not used by latency-sensitive tasks.
+The client runs mutilate to generate dynamically changing load across four memcached instances.
 
-These results show that the vCPU scaling API successfully handles dynamically changing workloads (Claim 5) and preserves CPU cycles for best-effort tasks.
+This experiment evaluates the effectiveness of the vCPU scaling API compared to two other approaches, "Naive" and "Pin".
+
+- `Naive`: All tasks share 6-core resources.
+- `Pin`: Dedicate one physical core to each latency-sensitive task
+
+This experiment reports the aggregated throughput of Seastar memcached and Sysbench.
+
+In `figures/fig11a.pdf`, you will see that the PvCC maintains high throughput of all time.
+
+In `figures/fig11c.pdf`, you will observe that, with the vCPU scaling API, the best-effort task can utilize the CPU time while the load for latency-sensitive tasks is low.
+
+These results show that the client can maintain high throughput of latency-sensitive tasks by the vCPU scaling API(Claim 5).
