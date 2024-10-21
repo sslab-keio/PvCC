@@ -57,7 +57,7 @@ def nginx(ax, dataroot, setup, preset_rates, linestyle):
 
     ax.set_xlim(0)
     ax.set_xlabel("Throughput [K requests/sec]")
-    ax.set_ylim((0, 6500))
+    ax.set_ylim((0))
     ax.set_yticks([0, 2000, 4000, 6000])
     ax.set_title("Nginx", y=titley, fontsize=11)
 
@@ -81,7 +81,7 @@ def redis(ax, dataroot, setup, preset_rates, linestyle):
     print(f"Redis, {setup}, max throughput: {max(rpss)}")
 
     ax.set_xlim((0))
-    ax.set_ylim((0, 3500))
+    ax.set_ylim((0))
     ax.set_xlabel("Throughput [K requests/sec]")
     ax.set_ylabel("99%-ile Latency [µs]")
     ax.set_title("Redis", y=titley, fontsize=11)
@@ -100,7 +100,6 @@ def main():
     linestyle = "-"
     rates = None
     if args.rates:
-        linestyle = "none"
         rates = args.rates
 
     dataroot = "/data/fig06"

@@ -106,7 +106,6 @@ for (dpdk_vm_num, preset_qpss, scale, ax, slos, xlim, conn) in [
         linestyle = "-"
         rates = all_rates[dpdk_vm_num][tslice]
         if args.rates:
-            linestyle = "none"
             rates = args.rates
         
         for qps in rates:
@@ -120,9 +119,9 @@ for (dpdk_vm_num, preset_qpss, scale, ax, slos, xlim, conn) in [
     ax.set_ylabel('99%-ile Latency [µs]')
     ax.set_xlim([0, xlim])
     
-    ax.legend(loc='upper center', fontsize=9)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.20), ncol=4, frameon=False, handlelength=0, handletextpad=0.9, fontsize=9, columnspacing=1.5)
 
-    ax.set_title(f'{dpdk_vm_num} VM')
+    ax.set_title(f'{dpdk_vm_num} VM', y=-0.45)
     
     for slo in slos:
         ax.axhline(y=slo, color='gray', linestyle=':', linewidth=1)

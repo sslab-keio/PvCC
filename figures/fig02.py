@@ -57,7 +57,6 @@ def main():
     linestyle = "-"
     threads = list(range(1, 24+1))
     if args.threads:
-        linestyle = "none"
         threads = args.threads
 
     dataroot = "/data/fig02"
