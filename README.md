@@ -21,7 +21,7 @@ This paper explores a practical means to employ Data Plane Development Kit (DPDK
 - Network access
 - SR-IOV capable 10G NIC
 - Software
-    - Docker and docker-compose to draw the figures
+    - Docker and docker-compose to generate the figures
         - Refer to [docker official document](https://docs.docker.com/engine/install/) for installation guide
 
 ### Experimental Setup
@@ -252,8 +252,9 @@ $ cd $ARTIFACT_ROOT
 
 $ sudo python3 experiments/fig02.py --threads 1 12 24 --trial 1
 
-# Draw a figure
+# Generate the figure
 $ sudo docker compose run --rm graph python3 /scripts/fig02.py --threads 1 12 24 --trial 1
+$ ls figures/out/fig02.01.pdf
 ```
 
 The server runs the Seastar, a high performance TCP/IP stack with two networking modes, kernel TCP/IP stack and DPDK network stack.
@@ -271,10 +272,10 @@ You will see that DPDK achieves around higher throughput than the kernel network
 $ cd $ARTIFACT_ROOT
 
 $ sudo python3 experiments/fig02.py
-$ ls data/fig02/dpdk data/fig02/linux
 
+# Generate the figure
 $ sudo docker compose run --rm graph python3 /scripts/fig02.py
-$ ls figures/fig02.pdf
+$ ls figures/out/fig02.pdf
 ```
 
 </details>
@@ -283,28 +284,25 @@ $ ls figures/fig02.pdf
 
 This experiment compares PvCC with the Xen's default schedulers, the Credit and Credit2 scheduler.
 
-Then, run the following commands.
+To conduct the experiment, run:
 ```sh
 $ cd $ARTIFACT_ROOT
 
 # Run with the vanilla Xen setup
 $ sudo python3 experiments/fig06_vanilla.py --workloads memcached --rates 5000 40000 90000 --trial 1
-# --workloads [WORKLOADS, ...]  # Execute specific workload only
-# --rates [RATES, ...]          # Restrict data with the specific RATES
-# --trial TRIAL
 
 # Reboot into Xen equipped with PvCC.
 $ sudo grub-reboot "Ubuntu GNU/Linux, with Xen 4.12.1-ae-pvcc and Linux `uname -r`"
 $ sudo reboot
 
-# Apply netplan again
 $ sudo netplan apply
 
 # Run with the PvCC setup
 $ sudo python3 experiments/fig06_pvcc.py --workloads memcached --rates 5000 40000 90000 --trial 1
 
-# Draw a figure
+# Generate the figure
 $ sudo docker compose run --rm graph python3 /scripts/fig06.py --workloads memcached --rates 5000 40000 90000 --trial 1
+$ ls figures/out/fig06.01.pdf
 ```
 
 The server runs four single-vCPU Seastar memcached instances on one physical core.
@@ -327,20 +325,18 @@ It also shows that this overhead can be mitigated by adopting microsecond-scale 
 $ sudo grub-reboot "Ubuntu GNU/Linux, with Xen 4.12.1-ae-pvcc and Linux `uname -r`"
 $ sudo reboot
 
-# Apply netplan again
 $ sudo netplan apply
 
-# Run the experiment
 $ cd $ARTIFACT_ROOT
-$ sudo python3 experiments/fig06_pvcc.py
-$ ls data/fig06/memcached/pvcc
-$ ls data/fig06/nginx/pvcc
-$ ls data/fig06/redis/pvcc
 
-# Draw a figure
+# Run the experiment script for PvCC Xen
+$ sudo python3 experiments/fig06_pvcc.py
+
 $ cd $ARTIFACT_ROOT
+
+# Generate the figure
 $ sudo docker compose run --rm graph python3 /scripts/fig06.py
-$ ls figures/fig06.pdf
+$ ls figures/out/fig06.pdf
 ```
 
 </details>
@@ -354,8 +350,9 @@ Run the following commands to conduct the experiment.
 $ cd $ARTIFACT_ROOT
 $ sudo python3 experiments/fig10.py --vms 4 --tslices 100 1000 --rates 1000 40000 100000 --trial 1
 
-# Draw a figure
+# Generate the figure
 $ sudo docker compose run --rm graph python3 /scripts/fig10.py --vms 4 --tslices 100 1000 --rates 1000 40000 100000 --trial 1
+$ ls figures/out/fig10.01.pdf
 ```
 
 The server runs four single-vCPU Seastar memcached instances with 100µs or 1000µs timeslice.
@@ -374,8 +371,11 @@ This means that short time slices offer low latency at the expense of maximum th
 
 ```sh
 $ cd $ARTIFACT_ROOT
+
+# Run the experiment script
 $ sudo python3 experiments/fig10.py
-$ ls data/fig10
+
+# Generate the figure
 $ sudo docker compose run --rm graph python3 /scripts/fig10.py
 $ ls figures/fig10.pdf
 ```
@@ -385,12 +385,13 @@ $ ls figures/fig10.pdf
 ### Experiment for Claim 5
 This experiment shows how the vCPU scaling API contributes to handling load increase.
 
-Run the following commands.
+To conduct the experiment, run:
 
 ```sh
 $ cd $ARTIFACT_ROOT
 $ sudo python3 experiments/fig11.py
-$ ls data/fig11
+
+# Generate the figures
 $ sudo docker compose run --rm graph python3 /scripts/fig11a.py
 $ sudo docker compose run --rm graph python3 /scripts/fig11c.py
 $ ls figures/fig11a.pdf figures/fig11c.pdf
