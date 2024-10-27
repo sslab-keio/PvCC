@@ -59,8 +59,8 @@ $ sudo apt install build-essential bcc bin86 gawk bridge-utils iproute2 libcurl4
 Build and install vanilla Xen and Xen equipped with PvCC.
 ```sh
 $ cd $ARTIFACT_ROOT           # Path to the cloned repository
-$ build-xen/vanilla/build.sh  # For vanilla Xen
-$ build-xen/pvcc/build.sh     # For PvCC
+$ build-xen/vanilla/build.sh  # Build vanilla Xen (about 8 min)
+$ build-xen/pvcc/build.sh     # Build PvCC (about 8 min)
 ```
 
 Reboot into the vanilla Xen with the following commands.
@@ -250,6 +250,7 @@ To conduct the experiment, run:
 ```sh
 $ cd $ARTIFACT_ROOT
 
+# Run the experiment script (about 3 min)
 $ sudo python3 experiments/fig02.py --threads 1 12 24 --trial 1
 
 # Generate the figure
@@ -271,6 +272,7 @@ You will see that DPDK achieves around higher throughput than the kernel network
 ```sh
 $ cd $ARTIFACT_ROOT
 
+# Run the experiment script (about 3 min)
 $ sudo python3 experiments/fig02.py
 
 # Generate the figure
@@ -288,7 +290,7 @@ To conduct the experiment, run:
 ```sh
 $ cd $ARTIFACT_ROOT
 
-# Run with the vanilla Xen setup
+# Run the experiment script for vanilla Xen (about 5 min)
 $ sudo python3 experiments/fig06_vanilla.py --workloads memcached --rates 5000 40000 90000 --trial 1
 
 # Reboot into Xen equipped with PvCC.
@@ -297,7 +299,7 @@ $ sudo reboot
 
 $ sudo netplan apply
 
-# Run with the PvCC setup
+# Run the experiment script for PvCC Xen (about 3 min)
 $ sudo python3 experiments/fig06_pvcc.py --workloads memcached --rates 5000 40000 90000 --trial 1
 
 # Generate the figure
@@ -348,6 +350,8 @@ Run the following commands to conduct the experiment.
 
 ```sh
 $ cd $ARTIFACT_ROOT
+
+# Run the experiment script (about 7 min)
 $ sudo python3 experiments/fig10.py --vms 4 --tslices 100 1000 --rates 1000 40000 100000 --trial 1
 
 # Generate the figure
@@ -389,6 +393,8 @@ To conduct the experiment, run:
 
 ```sh
 $ cd $ARTIFACT_ROOT
+
+# Run the experiment script (about 11 min)
 $ sudo python3 experiments/fig11.py
 
 # Generate the figures
