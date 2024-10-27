@@ -266,8 +266,11 @@ This experiment compares the achieved throughput of kernel TCP/IP stack and DPDK
 
 You will see that DPDK achieves around higher throughput than the kernel network stack, using the same amount of CPU resources (Claim 1).
 
+---
+The above script generates minimal data to support the claim.
+
 <details>
-    <summary>Evaluation with full data</summary>
+    <summary>Click here for the commands to generate the full data as in the paper.</summary>
 
 ```sh
 $ cd $ARTIFACT_ROOT
@@ -320,9 +323,14 @@ This result shows that the serving latency of DPDK-applied systems increases (Cl
 It also shows that this overhead can be mitigated by adopting microsecond-scale timeslice.
 
 <details>
-    <summary>Evaluation with full data</summary>
+    <summary>Click here for the commands to generate the full data as in the paper.</summary>
 
 ```sh
+$ cd $ARTIFACT_ROOT
+
+# Run the experiment script for vanilla Xen
+$ sudo python3 experiments/fig06_vanilla.py
+
 # Reboot into Xen equipped with PvCC.
 $ sudo grub-reboot "Ubuntu GNU/Linux, with Xen 4.12.1-ae-pvcc and Linux `uname -r`"
 $ sudo reboot
@@ -371,7 +379,7 @@ On the other hand, instances with the short timeslices (100µs) are saturated ea
 This means that short time slices offer low latency at the expense of maximum throughput (Claim 4).
 
 <details>
-    <summary>Evaluation with restrictive data</summary>
+    <summary>Click here for the commands to generate the full data as in the paper.</summary>
 
 ```sh
 $ cd $ARTIFACT_ROOT
