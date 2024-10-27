@@ -42,20 +42,19 @@ ninja -C build install
 cd /root/fstack/lib
 export FF_PATH=/root/fstack
 export PKG_CONFIG_PATH=`which pkg-config`
-make -j `nproc`
-make -j `nproc` install
+make -j
+make -j install
 
 cd /root/fstack/app/nginx-1.25.2
 bash ./configure --prefix=/usr/local/nginx_fstack --with-ff_module
-make -j `nproc`
-make -j `nproc` install
-# sed -i -E "s/^addr=.*/addr=10.0.0.10/g; s/^broadcast=.*/broadcast=10.0.0.255/g; s/^gateway=.*/gateway=10.0.0.1/g; s/^pkt_tx_delay=.*/pkt_tx_delay=0/g" /usr/local/nginx_fstack/conf/f-stack.conf
+make -j
+make -j install
 
 cd /root/fstack/app/redis-6.2.6/deps/jemalloc
 ./autogen.sh
 cd /root/fstack/app/redis-6.2.6
-make -j `nproc`
-make -j `nproc` install
+make -j
+make -j install
 EOF
 
 sudo xl destroy fstack-build
